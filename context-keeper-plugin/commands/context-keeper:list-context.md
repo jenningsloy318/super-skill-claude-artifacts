@@ -1,6 +1,6 @@
 ---
 name: context-keeper:list-context
-description: List all saved contexts for a session or all sessions
+description: List all saved contexts across all sessions, or filter by session
 argument-hint: "[session-id]"
 ---
 
@@ -10,7 +10,7 @@ Display saved context summaries from the context-keeper plugin.
 
 ## Arguments
 
-- `$ARGUMENTS` - Optional session ID to filter contexts. If omitted, lists all contexts.
+- `$ARGUMENTS` - Optional session ID to filter contexts. If omitted, lists ALL individual contexts across ALL sessions.
 
 ## Instructions
 
@@ -19,29 +19,35 @@ When this command is invoked:
 1. **Read the summaries index** at `{project}/.claude/summaries/index.json`
    - If it doesn't exist, inform the user no summaries are available
 
-2. **If session ID provided** (`$ARGUMENTS` is not empty):
+2. **If no session ID provided** (list all contexts):
+   - Show ALL individual context summaries across ALL sessions
+   - Display each context as a separate row (not grouped)
+   - Sort by most recent first
+   - Include session ID, timestamp, trigger, files modified, message count
+
+3. **If session ID provided** (`$ARGUMENTS` is not empty):
    - Filter summaries to show only entries matching that session ID
    - Show all compaction timestamps for that session
    - Display detailed information for each compaction
 
-3. **If no session ID provided** (list all):
-   - Show a summary table of all stored contexts
-   - Group by session ID if multiple compactions exist
-   - Sort by most recent first
-
 ## Output Format
 
-### When listing all contexts:
+### When listing all contexts (no argument):
 
 ```
-## Saved Contexts
+## All Saved Contexts
 
-| # | Session ID | Compactions | Latest | Files Modified | Messages |
-|---|------------|-------------|--------|----------------|----------|
-| 1 | abc123...  | 3           | 2025-11-24 19:04 | 15 | 150 |
-| 2 | def456...  | 1           | 2025-11-23 14:30 | 3  | 45  |
+| # | Session ID | Timestamp | Trigger | Files | Messages | Topics |
+|---|------------|-----------|---------|-------|----------|--------|
+| 1 | abc123...  | 2025-11-24 19:04 | auto | 15 | 150 | #api, #auth |
+| 2 | abc123...  | 2025-11-24 15:30 | manual | 8 | 95 | #refactor |
+| 3 | def456...  | 2025-11-23 14:30 | auto | 3 | 45 | #bugfix |
+| 4 | ghi789...  | 2025-11-22 10:15 | manual | 12 | 200 | #feature |
 
-Total: 2 sessions, 4 context summaries
+Total: 4 context summaries across 3 sessions
+
+Use `/context-keeper:load-context <session-id>` to load a specific context.
+Use `/context-keeper:list-context <session-id>` to see details for one session.
 ```
 
 ### When listing specific session:
